@@ -1,0 +1,8 @@
+FIRSTFLOOR  ansible_host=192.168.1.1
+SECONDFLOOR ansible_host=10.0.0.2
+THIRDFLOOR  ansible_host=10.0.0.6
+
+[routers]
+FIRSTFLOOR
+SECONDFLOOR
+THIRDFLOOR

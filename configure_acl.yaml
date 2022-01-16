@@ -1,0 +1,45 @@
+---
+
+  - name: Configure Standard ACL
+    hosts: SECONDFLOOR
+    gather_facts: false
+    connection: local
+    vars:
+      cli:
+        username: cisco
+        password: cisco123
+
+    tasks:
+      - name: Deny only PC3 network
+        ios_config:
+          provider: "{{ cli }}"
+          lines:
+            - 10 deny icmp host 192.168.2.2 any
+            - 20 permit ip any any
+          parents: ip access-list extended ACL-PC1
+          #before: no ip access-list extended ACL-SECONDFLOOR
+
+      - name: Apply in S0/0
+        ios_config:
+          provider: "{{ cli }}"
+          parents: interface s0/1
+          lines:
+            - ip access-group ACL-PC1 in
+
+      - name: Save Configuration
+        ios_config:
+          provider: "{{ cli }}"
+          lines:
+            - do write
+
+      - name: print ip route
+        ios_command:
+          provider: "{{ cli }}"
+          commands:
+            - show ip access-lists
+        register: config
+
+      - name: SAVE OUTPUT TO ./iosconfig/ 
+        copy:
+          content: "{{config.stdout[0]}}"
+          dest: "iosconfig/show_ip_accesslists{{inventory_hostname}}.txt"
